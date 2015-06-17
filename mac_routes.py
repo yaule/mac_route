@@ -5,9 +5,11 @@ def dowl_file():
   '''
   下载最新的ip列表
   '''
-  os.remove('delegated-apnic-latest')
+  f_test = os.path.isfile('delegated-apnic-latest')
+  if f_test:
+    os.remove('delegated-apnic-latest')
   url = 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest'
-  print 'download'
+  print 'download delegated-apnic-latest'
   urllib.urlretrieve(url,'delegated-apnic-latest')
 
 def cn_list():
@@ -16,6 +18,7 @@ def cn_list():
   '''
   latest_ip = file('delegated-apnic-latest','rb')
   cn_ip = file('cn_ip','wb')
+  print 'Generation CN IP'
   for lines in latest_ip.xreadlines():
     if lines.find('apnic|CN|ipv4') != -1:
       line = lines.split('|')
@@ -41,12 +44,14 @@ def route_change(act,gw):
   cn_ip_r = file('cn_ip','rb')
   for line in cn_ip_r.xreadlines():
     ip = line.strip('\n')
-    #test =
     commands.getoutput("sudo route %s %s %s &>/dev/null" %(act,ip,gw))
-    #print test
-    #test
 
-def start(args):
+def main():
+  arg = sys.argv
+  if len(arg) != 2:
+    print 'add change del reset'
+    sys.exit()
+  args = arg[1]
   if args == 'new':
     dowl_file()
     cn_list()
@@ -68,4 +73,4 @@ def start(args):
     '''
     print help_test
 if __name__ == "__main__":
-  start(sys.argv[1])
+  main()
